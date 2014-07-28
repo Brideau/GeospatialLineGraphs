@@ -5,3 +5,6 @@
 *.ods#
 .Rproj.user
 *.Rproj
+/TestPlots
+*.RData
+*.RHistory

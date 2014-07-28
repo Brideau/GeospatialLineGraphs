@@ -25,12 +25,13 @@ startEnd <- function(lats, lngs) {
 }
 
 startEndVals <- startEnd(all.data$Y, all.data$X)
+startLat <- startEndVals[1]
+endLat <- startEndVals[3]
+startLng <- startEndVals[2]
+endLng <- startEndVals[4]
 
 num_intervals = 100.0
 interval <- (startEndVals[1] - startEndVals[3]) / num_intervals
-
-# Provided a point, an interval, and a set of data with lat, lng, and a value of interest, return the sum
-# of all the values that are within a square bounded by point + interval along lat and lng.
 
 # testLng <- -66.6462379307115
 # testLat <- 45.9581234392
@@ -38,32 +39,63 @@ interval <- (startEndVals[1] - startEndVals[3]) / num_intervals
 # Prepare the data to be sent in
 data <- all.data[,c("Y", "X", "levy2014_ha")]
 
-sumInsideSquare <- function(point_lat, point_lng, interval, data) {
+sumInsideSquare <- function(pointLat, pointLng, interval, data) {
+  # Sum all the values that fall within a square on a map given a point,
+  # an interval of the map, and data that contains lat, lng and the values
+  # of interest
   
   colnames(data) <- c("lat", "lng", "value")
   
   # Data east of point
-  data <- data[data$lng > point_lng,] 
+  data <- data[data$lng > pointLng,] 
   # Data west of point + interval
-  data <- data[data$lng < point_lng + interval,] 
+  data <- data[data$lng < pointLng + interval,] 
   # Data north of point + interval (down)
-  data <- data[data$lat > point_lat - interval,]
+  data <- data[data$lat > pointLat - interval,]
   # Data south of point
-  data <- data[data$lat < point_lat, ]
+  data <- data[data$lat < pointLat, ]
   
   # Clean remaining data
   data <- na.omit(data)
   return(sum(data$value))
 }
 
-squareSumTemp <- sumInsideSquare(testLat, testLng, interval, data)
+# Debugging
+# squareSumTemp <- sumInsideSquare(testLat, testLng, interval, data)
 
+# Given a start longitude and an end longitude, calculate an array of values
+# corresponding to the sums for that latitude
 
+calcSumLat <- function(startLng, endLng, lat, interval, data) {
+  row <- c()
+  lng <- startLng
+  while (lng < endLng) {
+    row <- c(row, sumInsideSquare(lat, lng, interval, data))
+    lng <- lng + interval
+  }
+  return(row)
+}
 
+# Debugging
+# rowTemp <- calcSumLat(startLng, endLng, testLat, interval, data)
+# write.csv(rowTemp, file = "Temp.csv", row.names = FALSE)
 
+# Get each line of data to plot
+lat <- startLat
+rowCount <- 1
+all.sums <- list()
+while (lat > endLat) {
+  col <- calcSumLat(startLng, endLng, lat, interval, data)
+  all.sums[[as.character(rowCount)]] <- col
+  lat <- lat - interval
+  rowCount <- rowCount + 1
+}
 
+# Convert to data frame
+all.sums.frame <- data.frame(all.sums)
 
-
+# Save to disk so I don't have to run it again
+write.csv(all.sums.frame, file = "Levy2014Sums100", row.names = FALSE)
 
 
 

@@ -30,7 +30,7 @@ endLat <- startEndVals[3]
 startLng <- startEndVals[2]
 endLng <- startEndVals[4]
 
-num_intervals = 100.0
+num_intervals = 200.0
 interval <- (startEndVals[1] - startEndVals[3]) / num_intervals
 
 # testLng <- -66.6462379307115
@@ -95,15 +95,7 @@ while (lat > endLat) {
 all.sums.frame <- data.frame(all.sums)
 
 # Save to disk so I don't have to run it again
-write.csv(all.sums.frame, file = "Levy2014Sums100.csv", row.names = FALSE)
-
-
-
-
-
-
-
-
+write.csv(all.sums.frame, file = "Levy2014Sums200.csv", row.names = FALSE)
 
 
 

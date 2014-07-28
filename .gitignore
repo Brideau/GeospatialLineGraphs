@@ -3,3 +3,5 @@
 *.sublime-workspace
 *.ods
 *.ods#
+.Rproj.user
+*.Rproj

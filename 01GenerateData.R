@@ -95,7 +95,7 @@ while (lat > endLat) {
 all.sums.frame <- data.frame(all.sums)
 
 # Save to disk so I don't have to run it again
-write.csv(all.sums.frame, file = "Levy2014Sums100", row.names = FALSE)
+write.csv(all.sums.frame, file = "Levy2014Sums100.csv", row.names = FALSE)
 
 
 

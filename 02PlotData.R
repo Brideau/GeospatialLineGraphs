@@ -3,7 +3,7 @@ plot.data <- read.csv("Levy2014Sums200.csv", header=TRUE, stringsAsFactors=FALSE
 
 max <- max(plot.data) # Max value in the data, used for scaling
 plottingHeight <- 1000 # Arbitrary number that provides the graph's height
-scaleFactor <- 400 # Discovered through trial and error to keep the graph in the boundaries
+scaleFactor <- 350 # Discovered through trial and error to keep the graph in the boundaries
 gap <- plottingHeight / length(plot.data) # Space between lines
 
 # Used for splines since sometimes they can return negative values

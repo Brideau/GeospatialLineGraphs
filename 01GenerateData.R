@@ -1,3 +1,6 @@
+library(foreach)
+library(doParallel)
+
 all.data <- read.csv("./DataSets/FrederictonPropertyTaxDiffCleanedv3.csv", header=TRUE, stringsAsFactors=FALSE)
 # colnames(all.data) <- c("Name", "Mass", "Latitude", "Longitude")
 all.data$X <- as.numeric(all.data$X)
@@ -38,6 +41,8 @@ endLng <- startEndVals[4]
 num_intervals = 200.0
 interval <- (startEndVals[1] - startEndVals[3]) / num_intervals
 
+lat.list <- seq(startLat, endLat + interval, -1*interval)
+
 # testLng <- -66.6462379307115
 # testLat <- 45.9581234392
 
@@ -68,6 +73,8 @@ sumInsideSquare <- function(pointLat, pointLng, interval, data) {
 # Given a start longitude and an end longitude, calculate an array of values
 # corresponding to the sums for that latitude
 
+progress.counter <- 0
+
 calcSumLat <- function(startLng, endLng, lat, interval, data) {
   row <- c()
   lng <- startLng
@@ -75,6 +82,10 @@ calcSumLat <- function(startLng, endLng, lat, interval, data) {
     row <- c(row, sumInsideSquare(lat, lng, interval, data))
     lng <- lng + interval
   }
+  
+  progress.counter <<- progress.counter + 1
+  print(progress.counter)
+  
   return(row)
 }
 
@@ -82,20 +93,7 @@ calcSumLat <- function(startLng, endLng, lat, interval, data) {
 # rowTemp <- calcSumLat(startLng, endLng, testLat, interval, data)
 # write.csv(rowTemp, file = "Temp.csv", row.names = FALSE)
 
-# Get each line of data to plot
-lat <- startLat
-rowCount <- 1
-all.sums <- list()
-while (lat > endLat) {
-  col <- calcSumLat(startLng, endLng, lat, interval, data)
-  all.sums[[as.character(rowCount)]] <- col
-  
-  percentComplete = (startLat - lat) / (startLat - endLat) * 100
-  print(percentComplete)
-  
-  lat <- lat - interval
-  rowCount <- rowCount + 1
-}
+all.sums <- lapply(lat.list, calcSumLat, startLng=startLng, endLng=endLng, interval=interval, data=data)
 
 # Convert to data frame
 all.sums.frame <- data.frame(all.sums)

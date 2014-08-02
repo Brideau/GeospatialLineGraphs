@@ -1,6 +1,11 @@
-all.data <- read.csv("FrederictonPropertyTaxDiffCleanedv3.csv", header=TRUE, stringsAsFactors=FALSE)
+all.data <- read.csv("./DataSets/FrederictonPropertyTaxDiffCleanedv3.csv", header=TRUE, stringsAsFactors=FALSE)
+# colnames(all.data) <- c("Name", "Mass", "Latitude", "Longitude")
 all.data$X <- as.numeric(all.data$X)
 all.data$Y <- as.numeric(all.data$Y)
+# all.data$Mass <- as.numeric(all.data$Mass)
+
+# Time the code
+start <- proc.time()
 
 startEnd <- function(lats, lngs) {
   # Find the "upper left" (NW) and "bottom right" (SE) coordinates of a set of data.
@@ -37,7 +42,13 @@ interval <- (startEndVals[1] - startEndVals[3]) / num_intervals
 # testLat <- 45.9581234392
 
 # Prepare the data to be sent in
+
+# If you have a value you want to sum, use this
 data <- all.data[,c("Y", "X", "levy2014_ha")]
+
+# If you want to perform a count, use this
+#data <- all.data[,c("Y", "X")]
+#data["Value"] <- 1
 
 sumInsideSquare <- function(pointLat, pointLng, interval, data) {
   # Sum all the values that fall within a square on a map given a point,
@@ -46,17 +57,8 @@ sumInsideSquare <- function(pointLat, pointLng, interval, data) {
   
   colnames(data) <- c("lat", "lng", "value")
   
-  # Data east of point
-  data <- data[data$lng > pointLng,] 
-  # Data west of point + interval
-  data <- data[data$lng < pointLng + interval,] 
-  # Data north of point + interval (down)
-  data <- data[data$lat > pointLat - interval,]
-  # Data south of point
-  data <- data[data$lat < pointLat, ]
-  
-  # Clean remaining data
-  data <- na.omit(data)
+  # Data inside boundaries
+  data <- na.omit(data[data$lng > pointLng & data$lng < pointLng + interval & data$lat > pointLat - interval & data$lat < pointLat,])
   return(sum(data$value))
 }
 
@@ -87,6 +89,10 @@ all.sums <- list()
 while (lat > endLat) {
   col <- calcSumLat(startLng, endLng, lat, interval, data)
   all.sums[[as.character(rowCount)]] <- col
+  
+  percentComplete = (startLat - lat) / (startLat - endLat) * 100
+  print(percentComplete)
+  
   lat <- lat - interval
   rowCount <- rowCount + 1
 }
@@ -95,8 +101,10 @@ while (lat > endLat) {
 all.sums.frame <- data.frame(all.sums)
 
 # Save to disk so I don't have to run it again
-write.csv(all.sums.frame, file = "Levy2014Sums200.csv", row.names = FALSE)
+write.csv(all.sums.frame, file = "./GeneratedData/Temp.csv", row.names = FALSE)
 
-
+# End timer
+totalTime <- proc.time() - start
+print(totalTime)
 
 

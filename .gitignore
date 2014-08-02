@@ -8,3 +8,6 @@
 /TestPlots
 *.RData
 *.RHistory
+*.history
+/DataSets
+/Performance

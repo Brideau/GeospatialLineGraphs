@@ -63,7 +63,7 @@ sumInsideSquare <- function(pointLat, pointLng, interval, data) {
   colnames(data) <- c("lat", "lng", "value")
   
   # Data inside boundaries
-  data <- na.omit(data[data$lng > pointLng & data$lng < pointLng + interval & data$lat > pointLat - interval & data$lat < pointLat,])
+  data <- na.omit(data[data$lng >= pointLng & data$lng < pointLng + interval & data$lat >= pointLat - interval & data$lat < pointLat,])
   return(sum(data$value))
 }
 

@@ -1,0 +1,48 @@
+starting worker pid=4236 on localhost:11786 at 22:37:35.500
+starting worker pid=4244 on localhost:11786 at 22:37:35.682
+starting worker pid=4254 on localhost:11786 at 22:37:35.847
+starting worker pid=4262 on localhost:11786 at 22:37:36.015
+starting worker pid=4270 on localhost:11786 at 22:37:36.174
+starting worker pid=4278 on localhost:11786 at 22:37:36.340
+starting worker pid=4286 on localhost:11786 at 22:37:36.500
+starting worker pid=4294 on localhost:11786 at 22:37:36.665
+starting worker pid=4325 on localhost:11786 at 22:40:40.934
+starting worker pid=4333 on localhost:11786 at 22:40:41.096
+starting worker pid=4341 on localhost:11786 at 22:40:41.258
+starting worker pid=4349 on localhost:11786 at 22:40:41.424
+starting worker pid=4357 on localhost:11786 at 22:40:41.587
+starting worker pid=4365 on localhost:11786 at 22:40:41.745
+starting worker pid=4373 on localhost:11786 at 22:40:41.904
+starting worker pid=4381 on localhost:11786 at 22:40:42.062
+[1] 0.025
+[1] 0
+[1] 0.03
+[1] 0.01
+[1] 0.035
+[1] 0.005
+[1] 0.015
+[1] 0.02
+[1] 0.04
+[1] 0.05
+[1] 0.045
+[1] 0.055
+[1] 0.06
+[1] 0.07
+[1] 0.065
+[1] 0.075
+[1] 0.08
+[1] 0.09
+[1] 0.085
+[1] 0.095
+[1] 0.1
+[1] 0.11
+[1] 0.105
+[1] 0.115
+[1] 0.12
+[1] 0.125
+[1] 0.13
+[1] 0.135
+[1] 0.14
+[1] 0.145
+[1] 0.15
+[1] 0.155

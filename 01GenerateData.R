@@ -1,11 +1,13 @@
 library(foreach)
 library(doParallel)
 
-all.data <- read.csv("./DataSets/Meteorites.csv", header=TRUE, stringsAsFactors=FALSE)
-colnames(all.data) <- c("Name", "Mass", "Latitude", "Longitude")
+all.data <- read.csv("./DataSets/WorldPopulation.csv", header=TRUE, stringsAsFactors=FALSE)
+
+# The following are used to manipulate various data sets
+# colnames(all.data) <- c("Name", "Mass", "Latitude", "Longitude") # Meteorites
 # all.data$X <- as.numeric(all.data$X)
 # all.data$Y <- as.numeric(all.data$Y)
-all.data$Mass <- as.numeric(all.data$Mass)
+# all.data$Mass <- as.numeric(all.data$Mass)
 
 # Time the code
 start <- proc.time()
@@ -32,14 +34,18 @@ startEnd <- function(lats, lngs) {
   return(c(topLat, topLng, botLat, botLng))
 }
 
-startEndVals <- startEnd(all.data$Longitude, all.data$Latitude)
+startEndVals <- startEnd(all.data$Y, all.data$X)
+remove(startEnd)
+
 startLat <- startEndVals[1]
 endLat <- startEndVals[3]
 startLng <- startEndVals[2]
 endLng <- startEndVals[4]
+remove(startEndVals)
 
 num_intervals = 200.0
 interval <- (startEndVals[1] - startEndVals[3]) / num_intervals
+remove(num_intervals)
 
 lat.list <- seq(startLat, endLat + interval, -1*interval)
 
@@ -49,11 +55,11 @@ lat.list <- seq(startLat, endLat + interval, -1*interval)
 # Prepare the data to be sent in
 
 # If you have a value you want to sum, use this
-# data <- all.data[,c("Longitude", "Latitude", "Mass")]
+data <- all.data[,c("Y", "X", "DN")]
 
 # If you want to perform a count, use this
-data <- all.data[,c("Longitude", "Latitude")]
-data["Value"] <- 1
+# data <- all.data[,c("Longitude", "Latitude")]
+# data["Value"] <- 1
 
 sumInsideSquare <- function(pointLat, pointLng, interval, data) {
   # Sum all the values that fall within a square on a map given a point,
@@ -89,25 +95,31 @@ calcSumLat <- function(startLng, endLng, lat, interval, data) {
 # write.csv(rowTemp, file = "Temp.csv", row.names = FALSE)
 
 # Set up parallel computing with the number of cores you have
-cl <- makeCluster(detectCores())
+cl <- makeCluster(detectCores(), outfile = "./Progress.txt")
 registerDoParallel(cl)
 
 all.sums <- foreach(lat=lat.list) %dopar% {
   
   lat.data <- calcSumLat(startLng, endLng, lat, interval, data)
+  
+  # Progress indicator that works on Mac/Windows
+  print((startLat - lat)/(startLat - endLat)*100) # Prints to Progress.txt
+  
   lat.data
 
 }
+
+stopCluster(cl = NULL)
 
 # Convert to data frame
 all.sums.frame <- data.frame(all.sums)
 
 # Save to disk so I don't have to run it again
-write.csv(all.sums.frame, file = "./GeneratedData/MeteoriteCount.csv", row.names = FALSE)
+write.csv(all.sums.frame, file = "./GeneratedData/WorldPopulation.csv", row.names = FALSE)
 
 # End timer
 totalTime <- proc.time() - start
 print(totalTime)
 
-remove(all.sums, data, cl, endLat, endLng, startLat, startLng, lat.list, num_intervals, start, startEndVals, totalTime, calcSumLat, startEnd, sumInsideSquare, interval)
+remove(all.sums, data, cl, endLat, endLng, startLat, startLng, lat.list, start, startEndVals, totalTime, calcSumLat, sumInsideSquare, interval)
 

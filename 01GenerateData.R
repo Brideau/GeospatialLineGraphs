@@ -1,7 +1,14 @@
 library(foreach)
 library(doParallel)
+library(data.table)
 
+<<<<<<< HEAD
 all.data <- read.csv("./DataSets/NBBuildingsWGS84.csv", header=TRUE, stringsAsFactors=FALSE)
+=======
+file <- "./DataSets/NBBuildingsWGS84.csv"
+# Loads data
+all.data <- data.table(fread(file))
+>>>>>>> DataTable
 
 # The following are used to manipulate various data sets
 # colnames(all.data) <- c("Name", "Mass", "Latitude", "Longitude") # Meteorites
@@ -49,27 +56,40 @@ remove(num_intervals)
 
 lat.list <- seq(startLat, endLat + interval, -1*interval)
 
-# testLng <- -66.6462379307115
-# testLat <- 45.9581234392
+#testLng <- -66.66152983 # Fredericton
+#testLat <- 45.96538183 # Fredericton
 
 # Prepare the data to be sent in
 
 # If you have a value you want to sum, use this
+<<<<<<< HEAD
 # data <- all.data[,c("Y", "X", "DN")]
 
 # If you want to perform a count, use this
 data <- all.data[,c("X", "Y")]
 data["Value"] <- 1
+=======
+# data <- all.data[,c("X", "Y", "DN")]
+
+# If you want to perform a count, use this
+data <- all.data[,list(X, Y)]
+data[["Value"]] <- 1
+setkey(data, X, Y)
+>>>>>>> DataTable
 
 sumInsideSquare <- function(pointLat, pointLng, interval, data) {
   # Sum all the values that fall within a square on a map given a point,
   # an interval of the map, and data that contains lat, lng and the values
   # of interest
+<<<<<<< HEAD
   
   colnames(data) <- c("lng", "lat", "value")
+=======
+  setnames(data, c("lng", "lat", "value"))
+>>>>>>> DataTable
   
   # Data inside boundaries
-  data <- na.omit(data[data$lng >= pointLng & data$lng < pointLng + interval & data$lat >= pointLat - interval & data$lat < pointLat,])
+  data <- na.omit(data[data$lng >= pointLng & data$lng < pointLng + interval & data$lat >= pointLat - interval & data$lat < pointLat])
   return(sum(data$value))
 }
 
@@ -98,7 +118,7 @@ calcSumLat <- function(startLng, endLng, lat, interval, data) {
 cl <- makeCluster(detectCores(), outfile = "./Progress.txt")
 registerDoParallel(cl)
 
-all.sums <- foreach(lat=lat.list) %dopar% {
+all.sums <- foreach(lat=lat.list, .packages=c("data.table")) %dopar% {
   
   lat.data <- calcSumLat(startLng, endLng, lat, interval, data)
   
@@ -112,14 +132,14 @@ all.sums <- foreach(lat=lat.list) %dopar% {
 stopCluster(cl = NULL)
 
 # Convert to data frame
-all.sums.frame <- data.frame(all.sums)
+all.sums.table <- as.data.table(all.sums)
 
 # Save to disk so I don't have to run it again
-write.csv(all.sums.frame, file = "./GeneratedData/WorldPopulation.csv", row.names = FALSE)
+write.csv(all.sums.table, file = "./GeneratedData/LevyTable.csv", row.names = FALSE)
 
 # End timer
 totalTime <- proc.time() - start
 print(totalTime)
 
-remove(all.sums, data, cl, endLat, endLng, startLat, startLng, lat.list, start, startEndVals, totalTime, calcSumLat, sumInsideSquare, interval)
+# remove(cl, endLat, endLng, startLat, startLng, lat.list, start, calcSumLat, sumInsideSquare, interval)
 

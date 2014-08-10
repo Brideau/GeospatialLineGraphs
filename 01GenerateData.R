@@ -2,13 +2,9 @@ library(foreach)
 library(doParallel)
 library(data.table)
 
-<<<<<<< HEAD
-all.data <- read.csv("./DataSets/NBBuildingsWGS84.csv", header=TRUE, stringsAsFactors=FALSE)
-=======
 file <- "./DataSets/NBBuildingsWGS84.csv"
 # Loads data
 all.data <- data.table(fread(file))
->>>>>>> DataTable
 
 # The following are used to manipulate various data sets
 # colnames(all.data) <- c("Name", "Mass", "Latitude", "Longitude") # Meteorites
@@ -62,31 +58,19 @@ lat.list <- seq(startLat, endLat + interval, -1*interval)
 # Prepare the data to be sent in
 
 # If you have a value you want to sum, use this
-<<<<<<< HEAD
-# data <- all.data[,c("Y", "X", "DN")]
-
-# If you want to perform a count, use this
-data <- all.data[,c("X", "Y")]
-data["Value"] <- 1
-=======
 # data <- all.data[,c("X", "Y", "DN")]
 
 # If you want to perform a count, use this
 data <- all.data[,list(X, Y)]
 data[["Value"]] <- 1
 setkey(data, X, Y)
->>>>>>> DataTable
 
 sumInsideSquare <- function(pointLat, pointLng, interval, data) {
   # Sum all the values that fall within a square on a map given a point,
   # an interval of the map, and data that contains lat, lng and the values
   # of interest
-<<<<<<< HEAD
   
-  colnames(data) <- c("lng", "lat", "value")
-=======
   setnames(data, c("lng", "lat", "value"))
->>>>>>> DataTable
   
   # Data inside boundaries
   data <- na.omit(data[data$lng >= pointLng & data$lng < pointLng + interval & data$lat >= pointLat - interval & data$lat < pointLat])

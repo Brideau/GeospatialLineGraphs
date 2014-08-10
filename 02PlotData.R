@@ -14,6 +14,14 @@ for (i in bottom.padding) {
   plot.data <- cbind(plot.data, 0)
 }
 
+# On right
+right.padding <- 1:10
+zero.row <- vector(mode="integer", length=dim(plot.data)[1])
+for (i in right.padding) {
+  plot.data <- rbind(zero.row, plot.data)
+}
+
+
 max <- max(plot.data) # Max value in the data, used for scaling
 plottingHeight <- 1000 # Arbitrary number that provides the graph's height
 scaleFactor <- 300 # Discovered through trial and error to keep the graph in the boundaries

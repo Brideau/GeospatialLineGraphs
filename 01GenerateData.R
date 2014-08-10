@@ -52,8 +52,8 @@ remove(num_intervals)
 
 lat.list <- seq(startLat, endLat + interval, -1*interval)
 
-#testLng <- -66.66152983 # Fredericton
-#testLat <- 45.96538183 # Fredericton
+testLng <- -66.66152983 # Fredericton
+testLat <- 45.96538183 # Fredericton
 
 # Prepare the data to be sent in
 
@@ -62,8 +62,7 @@ lat.list <- seq(startLat, endLat + interval, -1*interval)
 
 # If you want to perform a count, use this
 data <- all.data[,list(X, Y)]
-data[["Value"]] <- 1
-setkey(data, X, Y)
+data[,Value:=1]
 
 sumInsideSquare <- function(pointLat, pointLng, interval, data) {
   # Sum all the values that fall within a square on a map given a point,
@@ -72,8 +71,9 @@ sumInsideSquare <- function(pointLat, pointLng, interval, data) {
   
   setnames(data, c("lng", "lat", "value"))
   
-  # Data inside boundaries
-  data <- na.omit(data[data$lng >= pointLng & data$lng < pointLng + interval & data$lat >= pointLat - interval & data$lat < pointLat])
+  # Get data inside lat/lon boundaries
+  data <- data[lng %between% c(pointLng, pointLng + interval)][lat %between% c(pointLat - interval, pointLat)]
+  
   return(sum(data$value))
 }
 
@@ -119,7 +119,7 @@ stopCluster(cl = NULL)
 all.sums.table <- as.data.table(all.sums)
 
 # Save to disk so I don't have to run it again
-write.csv(all.sums.table, file = "./GeneratedData/LevyTable.csv", row.names = FALSE)
+write.csv(all.sums.table, file = "./GeneratedData/LevyTable2.csv", row.names = FALSE)
 
 # End timer
 totalTime <- proc.time() - start

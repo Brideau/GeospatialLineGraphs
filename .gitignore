@@ -1,4 +1,3 @@
-*.csv
 *.sublime-project
 *.sublime-workspace
 *.ods
@@ -12,4 +11,3 @@
 /DataSets
 /Performance
 Progress.txt
-/GeneratedData

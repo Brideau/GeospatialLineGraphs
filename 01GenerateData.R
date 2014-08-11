@@ -1,10 +1,34 @@
 library(foreach)
 library(doParallel)
 library(data.table)
+library(raster)
 
-file <- "./DataSets/NBBuildingsWGS84.csv"
-# Loads data
-all.data <- data.table(fread(file))
+# Time the code
+start <- proc.time()
+
+if (!file.exists("./DataSets")) {
+  dir.create("./DataSets")
+}
+
+if (!file.exists("./DataSets")) {
+  dir.create("./DataSets")
+}
+
+# Data Source:
+# http://sedac.ciesin.columbia.edu/data/set/gpw-v3-population-count/data-download
+# Format: .ascii, 1/2 degree, 2000
+
+population.file <- "./DataSets/glp00ag30.asc"
+# Load the raster file
+population.raster <- raster(population.file)
+# Convert the raster file to a points file
+population.points <- rasterToPoints(population.raster)
+all.data <- as.data.table(population.points)
+
+# If you have your data in a CSV file, use this instead
+# file <- "./DataSets/NBBuildingsWGS84.csv"
+# all.data <- data.table(fread(file))
+
 
 # The following are used to manipulate various data sets
 # colnames(all.data) <- c("Name", "Mass", "Latitude", "Longitude") # Meteorites
@@ -12,18 +36,17 @@ all.data <- data.table(fread(file))
 # all.data$Y <- as.numeric(all.data$Y)
 # all.data$Mass <- as.numeric(all.data$Mass)
 
-# Time the code
-start <- proc.time()
-
 startEnd <- function(lats, lngs) {
-  # Find the "upper left" (NW) and "bottom right" (SE) coordinates of a set of data.
+  # Find the "upper left" (NW) and "bottom right" (SE) coordinates 
+  # of a set of data.
   #
   # Args:
   #  lats: A list of latitude coordinates
   #  lngs: A list of longitude coordinates
   #
   # Returns: 
-  #   A list of values corresponding to the northwest-most and southeast-most coordinates
+  #   A list of values corresponding to the northwest-most and 
+  # southeast-most coordinates
   
   # Convert to real number and remove NA values
   lats <- na.omit(as.numeric(lats))
@@ -33,11 +56,11 @@ startEnd <- function(lats, lngs) {
   topLng <- min(lngs)
   botLat <- min(lats)
   botLng <- max(lngs)
-    
+  
   return(c(topLat, topLng, botLat, botLng))
 }
 
-startEndVals <- startEnd(all.data$Y, all.data$X)
+startEndVals <- startEnd(all.data$y, all.data$x)
 remove(startEnd)
 
 startLat <- startEndVals[1]
@@ -52,17 +75,16 @@ remove(num_intervals)
 
 lat.list <- seq(startLat, endLat + interval, -1*interval)
 
-testLng <- -66.66152983 # Fredericton
-testLat <- 45.96538183 # Fredericton
+# testLng <- -66.66152983 # Fredericton
+# testLat <- 45.96538183 # Fredericton
 
 # Prepare the data to be sent in
-
 # If you have a value you want to sum, use this
-# data <- all.data[,c("X", "Y", "DN")]
+data <- all.data[,list(x, y, layer)]
 
 # If you want to perform a count, use this
-data <- all.data[,list(X, Y)]
-data[,Value:=1]
+# data <- all.data[,list(x, y)]
+# data[,Value:=1]
 
 sumInsideSquare <- function(pointLat, pointLng, interval, data) {
   # Sum all the values that fall within a square on a map given a point,
@@ -72,7 +94,9 @@ sumInsideSquare <- function(pointLat, pointLng, interval, data) {
   setnames(data, c("lng", "lat", "value"))
   
   # Get data inside lat/lon boundaries
-  data <- data[lng %between% c(pointLng, pointLng + interval)][lat %between% c(pointLat - interval, pointLat)]
+  lng.interval <- c(pointLng, pointLng + interval)
+  lat.interval <- c(pointLat - interval, pointLat)
+  data <- data[lng %between% lng.interval][lat %between% lat.interval]
   
   return(sum(data$value))
 }
@@ -110,7 +134,7 @@ all.sums <- foreach(lat=lat.list, .packages=c("data.table")) %dopar% {
   print((startLat - lat)/(startLat - endLat)*100) # Prints to Progress.txt
   
   lat.data
-
+  
 }
 
 stopCluster(cl = NULL)
@@ -119,7 +143,8 @@ stopCluster(cl = NULL)
 all.sums.table <- as.data.table(all.sums)
 
 # Save to disk so I don't have to run it again
-write.csv(all.sums.table, file = "./GeneratedData/LevyTable2.csv", row.names = FALSE)
+output.file <- "./GeneratedData/WorldPopulation2.csv"
+write.csv(all.sums.table, file = output.file, row.names = FALSE)
 
 # End timer
 totalTime <- proc.time() - start

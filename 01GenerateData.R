@@ -10,10 +10,6 @@ if (!file.exists("./DataSets")) {
   dir.create("./DataSets")
 }
 
-if (!file.exists("./DataSets")) {
-  dir.create("./DataSets")
-}
-
 # Data Source:
 # http://sedac.ciesin.columbia.edu/data/set/gpw-v3-population-count/data-download
 # Format: .ascii, 1/2 degree, 2000
@@ -24,6 +20,7 @@ population.raster <- raster(population.file)
 # Convert the raster file to a points file
 population.points <- rasterToPoints(population.raster)
 all.data <- as.data.table(population.points)
+setnames(all.data, c("x", "y", "population"))
 
 # If you have your data in a CSV file, use this instead
 # file <- "./DataSets/NBBuildingsWGS84.csv"
@@ -80,7 +77,7 @@ lat.list <- seq(startLat, endLat + interval, -1*interval)
 
 # Prepare the data to be sent in
 # If you have a value you want to sum, use this
-data <- all.data[,list(x, y, layer)]
+data <- all.data[,list(x, y, population)]
 
 # If you want to perform a count, use this
 # data <- all.data[,list(x, y)]
@@ -142,7 +139,11 @@ stopCluster(cl = NULL)
 # Convert to data frame
 all.sums.table <- as.data.table(all.sums)
 
+
 # Save to disk so I don't have to run it again
+if (!file.exists("./GeneratedData")) {
+  dir.create("./GeneratedData")
+}
 output.file <- "./GeneratedData/WorldPopulation2.csv"
 write.csv(all.sums.table, file = output.file, row.names = FALSE)
 

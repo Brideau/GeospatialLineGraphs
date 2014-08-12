@@ -134,7 +134,7 @@ all.sums <- foreach(lat=lat.list, .packages=c("data.table")) %dopar% {
   
 }
 
-stopCluster(cl = NULL)
+stopCluster(cl = cl)
 
 # Convert to data frame
 all.sums.table <- as.data.table(all.sums)

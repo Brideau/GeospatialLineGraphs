@@ -14,7 +14,7 @@ if (!file.exists("./DataSets")) {
 # http://sedac.ciesin.columbia.edu/data/set/gpw-v3-population-count/data-download
 # Format: .ascii, 1/2 degree, 2000
 
-population.file <- "./DataSets/glp00ag30.asc"
+population.file <- "./Canada/VoteDensityRaster64Bit.tif"
 # Load the raster file
 population.raster <- raster(population.file)
 # Convert the raster file to a points file
@@ -144,7 +144,7 @@ all.sums.table <- as.data.table(all.sums)
 if (!file.exists("./GeneratedData")) {
   dir.create("./GeneratedData")
 }
-output.file <- "./GeneratedData/WorldPopulation2.csv"
+output.file <- "./GeneratedData/VoteDensity01.csv"
 write.csv(all.sums.table, file = output.file, row.names = FALSE)
 
 # End timer

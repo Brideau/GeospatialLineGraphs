@@ -36,15 +36,13 @@ gap <- plottingHeight / length(plot.data) # Space between lines
 
 # Used for splines since sometimes they can return negative values
 zeroNegatives <- function(x) {
-  if (x < 0) { 
-    return (0) 
-  } else { 
-    return (x) 
+  if (x < 0) {
+    return (0)
+  } else {
+    return (x)
   }
 }
 
-setEPS()
-postscript(file = "./Export/VoteDensity01", pointsize=5, width=200, height=200)
 
 # Create a blank plot
 yVals <- as.vector(plot.data[[1]] / max * scaleFactor)
@@ -52,7 +50,7 @@ plot(0, 0, xlim=c(0, length(spline(1:length(yVals), yVals)$y)), ylim=c(0,1100), 
 
 plotting.threshold <- 0.2
 
-for (i in 1:length(plot.data)) {  
+for (i in 1:length(plot.data)) {
   # Grabs a row of data
   yVals <- as.vector(plot.data[[i]] / max * scaleFactor)
   
@@ -62,53 +60,20 @@ for (i in 1:length(plot.data)) {
   xValsSmoothed <- c(0, 0:(length(yValsSmoothed) - 1), length(yValsSmoothed))
   yValsSmoothed <- c(plottingHeight, yValsSmoothed + plottingHeight, plottingHeight)
   
-  polygon(x = xValsSmoothed, y = yValsSmoothed, border = NA, col = "#000000")
+  polygon(x = xValsSmoothed, y = yValsSmoothed, border = NA, col = "#ffffff")
   lines(x = xValsSmoothed, y = yValsSmoothed, col="#cccccc", lwd=1.5)
-
+  
   # Plot the peaks with a darker line
   j <- 2 # Skip padding
   while (j <= (length(yValsSmoothed) - 2)) {
-
+    
     if ((yValsSmoothed[j] - plottingHeight) > plotting.threshold | (yValsSmoothed[j+1] - plottingHeight) > plotting.threshold) {
-        segments(xValsSmoothed[j], yValsSmoothed[j], xValsSmoothed[j+1], yValsSmoothed[j+1], col="#ffffff", lwd=1.5)
+      segments(xValsSmoothed[j], yValsSmoothed[j], xValsSmoothed[j+1], yValsSmoothed[j+1], col="#000000", lwd=1.5)
     } else { } # Do nothing
-
+    
     j <- j + 1
-
-  }
-  while (j <= (length(yValsSmoothed) - 2)) {
-    
-    currentHeight <- yValsSmoothed[j] - plottingHeight
-    nextHeight <- yValsSmoothed[j+1] - plottingHeight
-    
-    if (currentHeight > plotting.threshold | nextHeight > plotting.threshold) {
-      
-      height <- if (currentHeight > plotting.threshold) currentHeight else nextHeight
-      xPoly <- c()
-      yPoly <- c()
-      
-      while (height > plotting.threshold) {
-        xPoly <- c(xPoly, xValsSmoothed[j])
-        yPoly <- c(yPoly, yValsSmoothed[j])
-        
-        j <- j + 1
-        height <- yValsSmoothed[j] - plottingHeight
-      }
-      
-      xPoly <- c(xPoly, xValsSmoothed[j])
-      yPoly <- c(yPoly, yValsSmoothed[j])
-      
-      polygon(x = xPoly, y = yPoly, border = NA, col = "#FFFFFF")
-      lines(x = xPoly, y = yPoly, col="#8E0000", lwd=1.5)
-      
-      
-    } else { 
-      j <- j + 1
-    } 
     
   }
   
   plottingHeight <- plottingHeight - gap
 }
-
-dev.off()

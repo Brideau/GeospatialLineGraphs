@@ -66,11 +66,13 @@ startLng <- startEndVals[2]
 endLng <- startEndVals[4]
 remove(startEndVals)
 
-num_intervals = 200.0
-interval <- (startLat - endLat) / num_intervals
+interval.v.num = 200.0
+interval.h.num = 800.0
+interval.v <- (startLat - endLat) / interval.v.num
+interval.h <- (endLng - startLng) / interval.h.num
 remove(num_intervals)
 
-lat.list <- seq(startLat, endLat + interval, -1*interval)
+lat.list <- seq(startLat, endLat + interval.v, -1*interval.v)
 
 # testLng <- -66.66152983 # Fredericton
 # testLat <- 45.96538183 # Fredericton
@@ -83,7 +85,7 @@ data <- all.data[,list(x, y, population)]
 # data <- all.data[,list(x, y)]
 # data[,Value:=1]
 
-sumInsideSquare <- function(pointLat, pointLng, interval, data) {
+sumInsideSquare <- function(pointLat, pointLng, data) {
   # Sum all the values that fall within a square on a map given a point,
   # an interval of the map, and data that contains lat, lng and the values
   # of interest
@@ -91,8 +93,8 @@ sumInsideSquare <- function(pointLat, pointLng, interval, data) {
   setnames(data, c("lng", "lat", "value"))
   
   # Get data inside lat/lon boundaries
-  lng.interval <- c(pointLng, pointLng + interval)
-  lat.interval <- c(pointLat - interval, pointLat)
+  lng.interval <- c(pointLng, pointLng + interval.h)
+  lat.interval <- c(pointLat - interval.v, pointLat)
   data <- data[lng %between% lng.interval][lat %between% lat.interval]
   
   return(sum(data$value))
@@ -104,12 +106,12 @@ sumInsideSquare <- function(pointLat, pointLng, interval, data) {
 # Given a start longitude and an end longitude, calculate an array of values
 # corresponding to the sums for that latitude
 
-calcSumLat <- function(startLng, endLng, lat, interval, data) {
+calcSumLat <- function(startLng, endLng, lat, data) {
   row <- c()
   lng <- startLng
   while (lng < endLng) {
-    row <- c(row, sumInsideSquare(lat, lng, interval, data))
-    lng <- lng + interval
+    row <- c(row, sumInsideSquare(lat, lng, data))
+    lng <- lng + interval.h
   }
   
   return(row)
@@ -125,7 +127,7 @@ registerDoParallel(cl)
 
 all.sums <- foreach(lat=lat.list, .packages=c("data.table")) %dopar% {
   
-  lat.data <- calcSumLat(startLng, endLng, lat, interval, data)
+  lat.data <- calcSumLat(startLng, endLng, lat, data)
   
   # Progress indicator that works on Mac/Windows
   print((startLat - lat)/(startLat - endLat)*100) # Prints to Progress.txt
@@ -144,7 +146,7 @@ all.sums.table <- as.data.table(all.sums)
 if (!file.exists("./GeneratedData")) {
   dir.create("./GeneratedData")
 }
-output.file <- "./GeneratedData/VoteDensity01.csv"
+output.file <- "./GeneratedData/VoteDensityHighRes.csv"
 write.csv(all.sums.table, file = output.file, row.names = FALSE)
 
 # End timer

@@ -34,46 +34,77 @@ plottingHeight <- 1000 # Arbitrary number that provides the graph's height
 scaleFactor <- 300 # Discovered through trial and error to keep the graph in the boundaries
 gap <- plottingHeight / length(plot.data) # Space between lines
 
-# Used for splines since sometimes they can return negative values
-zeroNegatives <- function(x) {
-  if (x < 0) {
-    return (0)
-  } else {
-    return (x)
-  }
-}
-
+svg(filename = "./TestPlots/CanadaHigherRes.svg", pointsize=12, width=36, height=24)
 
 # Create a blank plot
 yVals <- as.vector(plot.data[[1]] / max * scaleFactor)
-plot(0, 0, xlim=c(0, length(spline(1:length(yVals), yVals)$y)), ylim=c(0,1100), type="n", las=1, xlab=NA, ylab=NA, bty="n", axes=FALSE)
+plot(0, 0, xlim=c(0, length(yVals)), ylim=c(0,1100), type="n", las=1, xlab=NA, ylab=NA, bty="n", axes=FALSE)
 
 plotting.threshold <- 0.2
+
+# x, y: the x and y coordinates of the hull points
+# n: the number of points in the curve.
+bezierCurve <- function(x, y, n=10)
+{
+  outx <- NULL
+  outy <- NULL
+  
+  i <- 1
+  for (t in seq(0, 1, length.out=n))
+  {
+    b <- bez(x, y, t)
+    outx[i] <- b$x
+    outy[i] <- b$y
+    
+    i <- i+1
+  }
+  
+  return (list(x=outx, y=outy))
+}
+
+bez <- function(x, y, t)
+{
+  outx <- 0
+  outy <- 0
+  n <- length(x)-1
+  for (i in 0:n)
+  {
+    outx <- outx + choose(n, i)*((1-t)^(n-i))*t^i*x[i+1]
+    outy <- outy + choose(n, i)*((1-t)^(n-i))*t^i*y[i+1]
+  }
+  
+  return (list(x=outx, y=outy))
+}
+
 
 for (i in 1:length(plot.data)) {
   # Grabs a row of data
   yVals <- as.vector(plot.data[[i]] / max * scaleFactor)
+  xVals <- c(0:(length(yVals) - 1))
   
-  yValsSmoothed <- spline(1:length(yVals), yVals)$y
-  yValsSmoothed <- sapply(yValsSmoothed, zeroNegatives)
+  # smoothed <- loess(yVals + plottingHeight~xVals)
+  #yValsSmoothed <- sapply(yValsSmoothed, zeroNegatives)
   
-  xValsSmoothed <- c(0, 0:(length(yValsSmoothed) - 1), length(yValsSmoothed))
-  yValsSmoothed <- c(plottingHeight, yValsSmoothed + plottingHeight, plottingHeight)
+  # xValsSmoothed <- c(0, 0:(length(yValsSmoothed) - 1), length(yValsSmoothed))
+  # yValsSmoothed <- c(plottingHeight, yValsSmoothed + plottingHeight, plottingHeight)
+  # newXVals <- seq(min(xVals),max(xVals), (max(xVals) - min(xVals))/10)
   
-  polygon(x = xValsSmoothed, y = yValsSmoothed, border = NA, col = "#ffffff")
-  lines(x = xValsSmoothed, y = yValsSmoothed, col="#cccccc", lwd=1.5)
+  polygon(bezierCurve(xVals, yVals + plottingHeight, 800), border = NA, col = "#ffffff")
+  lines(bezierCurve(xVals, yVals + plottingHeight, 800), col="#cccccc", lwd=1.5)
   
-  # Plot the peaks with a darker line
-  j <- 2 # Skip padding
-  while (j <= (length(yValsSmoothed) - 2)) {
-    
-    if ((yValsSmoothed[j] - plottingHeight) > plotting.threshold | (yValsSmoothed[j+1] - plottingHeight) > plotting.threshold) {
-      segments(xValsSmoothed[j], yValsSmoothed[j], xValsSmoothed[j+1], yValsSmoothed[j+1], col="#000000", lwd=1.5)
-    } else { } # Do nothing
-    
-    j <- j + 1
-    
-  }
+  # # Plot the peaks with a darker line
+  # j <- 2 # Skip padding
+  # while (j <= (length(yVals) - 2)) {
+  #   
+  #   if ((yVals[j] - plottingHeight) > plotting.threshold | (yVals[j+1] - plottingHeight) > plotting.threshold) {
+  #     segments(xVals[j], yVals[j], xVals[j+1], yVals[j+1], col="#000000", lwd=1.5)
+  #   } else { } # Do nothing
+  #   
+  #   j <- j + 1
+  #   
+  # }
   
   plottingHeight <- plottingHeight - gap
 }
+
+dev.off()

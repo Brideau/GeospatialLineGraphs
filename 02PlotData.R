@@ -82,13 +82,6 @@ for (i in 1:length(plot.data)) {
   yVals <- as.vector(plot.data[[i]] / max * scaleFactor)
   xVals <- c(0:(length(yVals) - 1))
   
-  # smoothed <- loess(yVals + plottingHeight~xVals)
-  #yValsSmoothed <- sapply(yValsSmoothed, zeroNegatives)
-  
-  # xValsSmoothed <- c(0, 0:(length(yValsSmoothed) - 1), length(yValsSmoothed))
-  # yValsSmoothed <- c(plottingHeight, yValsSmoothed + plottingHeight, plottingHeight)
-  # newXVals <- seq(min(xVals),max(xVals), (max(xVals) - min(xVals))/10)
-  
   polygon(bezierCurve(xVals, yVals + plottingHeight, 800), border = NA, col = "#ffffff")
   lines(bezierCurve(xVals, yVals + plottingHeight, 800), col="#cccccc", lwd=1.5)
   

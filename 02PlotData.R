@@ -34,7 +34,10 @@ plottingHeight <- 1000 # Arbitrary number that provides the graph's height
 scaleFactor <- 300 # Discovered through trial and error to keep the graph in the boundaries
 gap <- plottingHeight / length(plot.data) # Space between lines
 
-svg(filename = "./TestPlots/CanadaHigherRes.svg", pointsize=12, width=36, height=24)
+# Output the file to a 36 inch by 24 inch SVG canvas
+plot.width = 36
+plot.height = 24
+svg(filename = "./TestPlots/CanadaHigherRes.svg", pointsize=12, width=plot.width, height=plot.height)
 
 # Create a blank plot
 yVals <- as.vector(plot.data[[1]] / max * scaleFactor)
@@ -82,10 +85,13 @@ for (i in 1:length(plot.data)) {
   yVals <- as.vector(plot.data[[i]] / max * scaleFactor)
   xVals <- c(0:(length(yVals) - 1))
   
+  # Resolution in mm (I'm mixing metric and imperial here...blame me, I'm Canadian). 24 mm = 1 inch
+  resolution = 1
+  point.count = plot.width * 24 * resolution
   polygon(bezierCurve(xVals, yVals + plottingHeight, 800), border = NA, col = "#ffffff")
   lines(bezierCurve(xVals, yVals + plottingHeight, 800), col="#cccccc", lwd=1.5)
   
-  # # Plot the peaks with a darker line
+  # # Plot the peaks with a darker line. I have not updated this since switching the smoothing to bezier from spline so just uncommenting it won't work.
   # j <- 2 # Skip padding
   # while (j <= (length(yVals) - 2)) {
   #   

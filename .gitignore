@@ -14,3 +14,7 @@ Progress.txt
 /Export
 Canada/
 GeneratedData/
+.DS_Store
+*.csv
+Design/
+GeneratedData/

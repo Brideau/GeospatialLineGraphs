@@ -40,7 +40,7 @@ gap <- plottingHeight / length(plot.data) # Space between lines
 
 plot.width = 25
 plot.height = 15
-svg(filename = "./TestPlots/CanadaSGBigPeaks2.svg", pointsize=12, width=plot.width, height=plot.height)
+svg(filename = "./CanadaSGBigPeaks2.svg", pointsize=12, width=plot.width, height=plot.height)
 
 # Create a blank plot
 yVals <- as.vector(plot.data[[1]] / max * scaleFactor)
